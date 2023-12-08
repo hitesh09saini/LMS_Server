@@ -1,0 +1,71 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Compiled binary addons (e.g. node-sass)
+build/Release
+
+# Local environment variables
+.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE-specific files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# WebStorm
+.idea/
+
+# TextMate
+*.tmproj
+*.tmproject
+
+# Visual Studio Code
+.vscode/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Jest coverage
+coverage/
+
+# End of File
