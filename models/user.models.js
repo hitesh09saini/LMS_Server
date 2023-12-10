@@ -1,3 +1,7 @@
+require('dotenv').config({
+    path: '../.env'
+});
+
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -29,7 +33,7 @@ const userSchema = new Schema({
         select: false,
     },
 
-    avtar: {
+    avatar: {
         public_id: {
             type: String
         },
@@ -63,14 +67,13 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods = {
     generateJETToken:async function () {
+       
         return await jwt.sign({ id: this._id, email: this.email, subscription: this.subscription, role: this.role },
             process.env.JWT_SECRET,
 
             {
-                expiresIn: process.env.JWR_EXPIRY,
+                expiresIn: process.env.JWT_EXPIRY,
             }
-
-
         )
     },
 

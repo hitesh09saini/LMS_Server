@@ -1,5 +1,10 @@
+require('dotenv').config({
+    path: '../.env'
+});
+
 const AppError = require("../utils/error.utils");
 const jwt = require('jsonwebtoken')
+
 const isLoggedIn = async (req,res, next)=>{
 
     const { token } = req.cookies;

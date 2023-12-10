@@ -1,5 +1,7 @@
 const AppError = require('../utils/error.utils')
 const User = require('../models/user.models')
+const cloudinaryURl = require('../utils/cloudinary')
+
 const cookieOptions = {
     maxAge: 7 * 24 * 60 * 1000,
     httpOnly: true,
@@ -7,35 +9,49 @@ const cookieOptions = {
 }
 // register user
 const register = async (req, res, next) => {
-
     try {
-
         const { fullName, email, password } = req.body;
+
+
         if (!fullName || !email || !password) {
-            return next(new AppError('All fields are required', 400));
+            throw next(new AppError("All fields are required", 400));
         }
 
-        const userExists = User.findOne({ email });
+        const userExists = await User.findOne({ email });
 
         if (userExists) {
-            return next(new AppError('Email already Exists', 400))
+            return next(new AppError('Email already Exists', 400));
         }
+
+        // check the file 
+
+        // console.log(req.file);
+
+        if (!req.file) {
+            return next(new AppError("File is not exist", 400));
+        }
+
+        //    upload on cloudinary
+
+         const result = await cloudinaryURl(req.file.path);
+        //  console.log(result);
+       
+        // // create user 
 
         const user = await User.create({
             fullName,
             email,
             password,
-            avtar: {
-                public_id: email,
-                secure_url: '',
+            avatar: {
+                public_id: result.public_id,
+                secure_url: result.secure_url,
             }
-        })
+        });
 
         if (!user) {
-            return next(new AppError('User registration failed, please try again', 400))
+            return next(new AppError('User registration failed, please try again', 400));
         }
 
-        // file upload
 
 
         await user.save();
@@ -43,18 +59,18 @@ const register = async (req, res, next) => {
 
         const token = await user.generateJETToken();
 
+        // console.log(token);
         res.cookie('token', token, cookieOptions);
 
         res.status(200).json({
             success: true,
-            message: 'User registerd successfully',
+            message: 'User registered successfully',
             user,
-        })
-
+        });
     } catch (error) {
-        return next(new AppError(error.message, 400));
+        next(new AppError("Internal Server Error", 500));
     }
-}
+};
 
 // login user
 const login = async (req, res, next) => {
@@ -78,9 +94,11 @@ const login = async (req, res, next) => {
         user.password = undefined;
 
         res.cookie('token', token, cookieOptions);
+
         res.status(200).json({
             success: true,
-            message: 'User loggedin Successfully'
+            message: 'User loggedin Successfully',
+            user,
         })
 
     } catch (error) {
@@ -115,8 +133,6 @@ const getProfile = async (req, res) => {
             userId
         })
 
-
-
         res.status(200).json({
             success: true,
             message: 'User details',
@@ -127,7 +143,6 @@ const getProfile = async (req, res) => {
     }
 
 }
-
 
 module.exports = {
     register,
