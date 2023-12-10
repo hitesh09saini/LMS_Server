@@ -107,7 +107,6 @@ const login = async (req, res, next) => {
 
 }
 
-
 // logout user
 
 const logout = (req, res) => {
@@ -122,7 +121,6 @@ const logout = (req, res) => {
         message: 'User logged out successfully'
     })
 }
-
 
 // get profile
 const getProfile = async (req, res) => {
@@ -143,6 +141,13 @@ const getProfile = async (req, res) => {
     }
 
 }
+
+// forgot password
+
+const forgotPassword = async (req, res)=>{
+
+}
+
 
 module.exports = {
     register,
