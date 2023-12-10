@@ -5,6 +5,7 @@ require('dotenv').config({
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const userSchema = new Schema({
 
@@ -49,8 +50,8 @@ const userSchema = new Schema({
     },
 
     forgotPasswordToken: String,
+    forgotPasswordExpiry: Date,
 
-    forgotPasswordExpiry: Date
 
 }, {
     timestamps: true
@@ -66,22 +67,34 @@ userSchema.pre('save', async function (next) {
 })
 
 userSchema.methods = {
-    generateJETToken:async function () {
-       
+    generateJETToken: async function () {
+
         return await jwt.sign({ id: this._id, email: this.email, subscription: this.subscription, role: this.role },
             process.env.JWT_SECRET,
-
             {
                 expiresIn: process.env.JWT_EXPIRY,
             }
         )
     },
 
-    comparePassword:async function (plainTextPassword) {
-        return  await bcrypt.compare(plainTextPassword,this.password);
-
+    comparePassword: async function (plainTextPassword) {
+        return await bcrypt.compare(plainTextPassword, this.password);
     },
+
+    generatePasswordResetToken: async function(){
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        
+        this.forgotPasswordToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex')
+
+        this.forgotPasswordExpiry = Date.now() + 15 * 60 * 1000;  // 15 min from now
+        return resetToken;
+    },
+
 }
+
 
 
 const User = model('User', userSchema);
