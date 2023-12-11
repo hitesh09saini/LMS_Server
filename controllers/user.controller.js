@@ -1,9 +1,9 @@
 const AppError = require('../utils/error.utils')
 const User = require('../models/user.models')
-const cloudinaryURl = require('../utils/cloudinary')
+const {cloudinaryURl, deleteClodinaryUrl}= require('../utils/cloudinary')
 const sendEmail = require('../utils/mail')
 const crypto = require('crypto');
-const asyncHandler = require('../middlewares/asyncHandler.middleware')
+const asyncHandler = require('../middlewares/asyncHandler.middleware');
 
 const cookieOptions = {
     maxAge: 7 * 24 * 60 * 1000,
@@ -22,7 +22,7 @@ const register = asyncHandler(async (req, res, next) => {
     }
 
     const userExists = await User.findOne({ email });
-
+    console.log(userExists);
     if (userExists) {
         return next(new AppError('Email already Exists', 400));
     }
@@ -183,54 +183,135 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 // reset password
 const resetPassword = asyncHandler(async (req, res, next) => {
     // Extracting resetToken from req.params object
-  const { resetToken } = req.params;
-  // Extracting password from req.body object
-  const { password } = req.body;
+    const { resetToken } = req.params;
+    // Extracting password from req.body object
+    const { password } = req.body;
 
-  // We are again hashing the resetToken using sha256 since we have stored our resetToken in DB using the same algorithm
-  const forgotPasswordToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+    // We are again hashing the resetToken using sha256 since we have stored our resetToken in DB using the same algorithm
+    const forgotPasswordToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
 
-  // Check if password is not there then send response saying password is required
-  if (!password) {
-    return next(new AppError('Password is required', 400));
-  }
+    // Check if password is not there then send response saying password is required
+    if (!password) {
+        return next(new AppError('Password is required', 400));
+    }
 
-  console.log(forgotPasswordToken);
+    //   console.log(forgotPasswordToken);
 
-  // Checking if token matches in DB and if it is still valid(Not expired)
-  const user = await User.findOne({
-    forgotPasswordToken,
-    forgotPasswordExpiry: { $gt: Date.now() }, // $gt will help us check for greater than value, with this we can check if token is valid or expired
-  });
+    // Checking if token matches in DB and if it is still valid(Not expired)
+    const user = await User.findOne({
+        forgotPasswordToken,
+        forgotPasswordExpiry: { $gt: Date.now() }, // $gt will help us check for greater than value, with this we can check if token is valid or expired
+    });
 
-  // If not found or expired send the response
-  if (!user) {
-    return next(
-      new AppError('Token is invalid or expired, please try again', 400)
-    );
-  }
+    // If not found or expired send the response
+    if (!user) {
+        return next(
+            new AppError('Token is invalid or expired, please try again', 400)
+        );
+    }
 
-  // Update the password if token is valid and not expired
-  user.password = password;
+    // Update the password if token is valid and not expired
+    user.password = password;
 
-  // making forgotPassword* valus undefined in the DB
-  user.forgotPasswordExpiry = undefined;
-  user.forgotPasswordToken = undefined;
+    // making forgotPassword* valus undefined in the DB
+    user.forgotPasswordExpiry = undefined;
+    user.forgotPasswordToken = undefined;
 
-  // Saving the updated user values
-  await user.save();
+    // Saving the updated user values
+    await user.save();
 
-  // Sending the response when everything goes good
-  res.status(200).json({
-    success: true,
-    message: 'Password changed successfully',
-  });
+    // Sending the response when everything goes good
+    res.status(200).json({
+        success: true,
+        message: 'Password changed successfully',
+    });
 })
 
-// 
+// changePassword
+
+const changePassword = asyncHandler(async (req, res, next) => {
+    const { oldPassword, newPassword } = req.body;
+    const { id } = req.user;
+    if (!oldPassword || !newPassword) {
+        return next(
+            new AppError('All fiels are manddantoy', 400)
+        )
+    }
+
+    const user = await User.findById(id).select('+password');
+
+    if (!user) {
+        return next(
+            new AppError('User does not exist', 400)
+        )
+    }
+
+    const isPasswordValid = await user.comparePassword(oldPassword);
+
+    if (!isPasswordValid) {
+        return next(
+            new AppError('Old Password is invalid', 400)
+        )
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    user.password = undefined;
+
+    res.status(200).json({
+        success: true,
+        message: 'Password change successfully !',
+        user,
+    });
+
+})
+
+
+
+// updateProfile
+
+const updateProfile = asyncHandler(async (req, res, next) => {
+    const { fullName } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        return next(
+            new AppError('User does not exist', 400)
+        )
+    }
+
+    if (req.fullName) {
+        // change name 
+        user.fullName = fullName;
+    }
+
+    // check file
+    if (req.file) {
+        // remove file from cloudinary
+        await deleteClodinaryUrl(user.avatar.public_id);
+        // upload on cloudinary
+        const result = await cloudinaryURl(req.file.path);
+        user.avatar.public_id = result.public_id;
+        user.avatar.secure_url = result.secure_url;
+    }
+
+
+    await user.save();
+
+    res.status(200).json({
+        success: true,
+        message: 'Profile updated !',
+        user,
+    });
+
+})
+
+
+
 
 
 module.exports = {
@@ -239,5 +320,7 @@ module.exports = {
     logout,
     getProfile,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    changePassword,
+    updateProfile
 }

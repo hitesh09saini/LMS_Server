@@ -25,4 +25,8 @@ const cloudinaryURl = async (localFilePath) => {
     }
 }
 
-module.exports = cloudinaryURl;
+const deleteClodinaryUrl = async (publicId)=>{
+    await cloudinary.v2.uploader.destroy(publicId)
+}
+
+module.exports ={ cloudinaryURl, deleteClodinaryUrl};

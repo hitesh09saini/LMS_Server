@@ -1,10 +1,9 @@
+
 const mongoose = require('mongoose')
-
-
 
 mongoose.set('strictQuery', false);
 
-const MONGO_URl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/LMS'
+const MONGO_URl = process.env.MONGO_URL ;
 
 const connectionToDB = async () => {
     try {
