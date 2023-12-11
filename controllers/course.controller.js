@@ -20,6 +20,7 @@ const getCourses = asyncHandler(async (req, res, next) => {
 // get lecture by id
 const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
+   
     const course = await Course.findById(id);
     if (!course) {
         return next(
@@ -39,7 +40,7 @@ const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
 
 const createCourse = asyncHandler(async (req, res, next) => {
     const { title, description, category, createdBy } = req.body;
-    // console.log(title, description, category, createdBy);
+    console.log(title, description, category, createdBy);
 
     if (!title || !description || !category || !createdBy) {
         throw next(new AppError("All fields are required", 400));
