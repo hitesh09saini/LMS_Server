@@ -31,6 +31,10 @@ app.use('/api/v1/user', userRouter);
 const courseRouter = require('./routes/course.routes');
 app.use('/api/v1/courses', courseRouter);
 
+// payment routes
+const paymentRouter = require('./routes/payment.routes');
+app.use('/api/v1/payments', paymentRouter);
+
 
 app.all('*', (req, res) => {
     const decodedUrl = decodeURIComponent(req.url);
