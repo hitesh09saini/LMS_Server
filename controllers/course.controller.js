@@ -20,7 +20,7 @@ const getCourses = asyncHandler(async (req, res, next) => {
 // get lecture by id
 const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-   
+
     const course = await Course.findById(id);
     if (!course) {
         return next(
@@ -131,11 +131,58 @@ const removeCourse = asyncHandler(async (req, res, next) => {
 
 })
 
+// addLectures
+const addLectureToCourseById = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const { title, description } = req.body;
+     console.log(title, description );
+    if (!title || !description) {
+        throw next(new AppError("All fields are required", 400));
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+        return next(
+            new AppError('Course with given id does not exist', 500)
+        )
+    }
+
+
+    if (!course) {
+        return next(new AppError('Creating of course failed, please try again', 400));
+    }
+
+    const lectureData = {
+        title,
+        description,
+        lecture: {}
+    }
+
+    if (req.file) {
+        const result = await cloudinaryURl(req.file.path);
+        lectureData.lecture.public_id = result.public_id;
+        lectureData.lecture.secure_url = result.secure_url;
+    }
+
+    // console.log(lectureData);
+    course.lectures.push(lectureData);
+    course.numberOfLectures = course.lectures.length;
+    await course.save();
+
+    res.status(201).json({
+        success: true,
+        message: 'lecture created successfully',
+        course,
+    });
+
+
+})
 
 module.exports = {
     getCourses,
     getLecturesByCourseId,
     createCourse,
     updateCourse,
-    removeCourse
+    removeCourse,
+    addLectureToCourseById
 }

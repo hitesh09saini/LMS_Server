@@ -4,7 +4,8 @@ const { getCourses,
     getLecturesByCourseId,
     createCourse,
     updateCourse,
-    removeCourse } = require('../controllers/course.controller');
+    removeCourse,
+    addLectureToCourseById} = require('../controllers/course.controller');
 
 const authorizedRoles = require('../middlewares/auth.middleWare');
 const isLoggedIn = require('../middlewares/isLogged.middleware');
@@ -16,9 +17,11 @@ router.route('/')
     .post(isLoggedIn, authorizedRoles('ADMIN'), upload.single('thumbnail'), createCourse)
 
 
-router.route('/:id').get(isLoggedIn, getLecturesByCourseId)
+router.route('/:id')
+    .get(isLoggedIn, getLecturesByCourseId)
     .put(isLoggedIn,authorizedRoles('ADMIN'), updateCourse)
     .delete(isLoggedIn,authorizedRoles('ADMIN'), removeCourse)
+    .post(isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), addLectureToCourseById)
 
 
 
