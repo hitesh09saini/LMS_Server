@@ -5,7 +5,8 @@ const { getCourses,
     createCourse,
     updateCourse,
     removeCourse,
-    addLectureToCourseById} = require('../controllers/course.controller');
+    addLectureToCourseById,
+    deleteLectureToCourseById} = require('../controllers/course.controller');
 
 const authorizedRoles = require('../middlewares/auth.middleWare');
 const isLoggedIn = require('../middlewares/isLogged.middleware');
@@ -23,6 +24,7 @@ router.route('/:id')
     .delete(isLoggedIn,authorizedRoles('ADMIN'), removeCourse)
     .post(isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), addLectureToCourseById)
 
+router.route('/:id/:lectureid').delete(isLoggedIn,authorizedRoles('ADMIN'), deleteLectureToCourseById);
 
 
 module.exports = router;

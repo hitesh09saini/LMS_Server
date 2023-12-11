@@ -135,7 +135,7 @@ const removeCourse = asyncHandler(async (req, res, next) => {
 const addLectureToCourseById = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { title, description } = req.body;
-     console.log(title, description );
+    //  console.log(title, description );
     if (!title || !description) {
         throw next(new AppError("All fields are required", 400));
     }
@@ -178,11 +178,37 @@ const addLectureToCourseById = asyncHandler(async (req, res, next) => {
 
 })
 
+// delete a lecture 
+
+const deleteLectureToCourseById = asyncHandler(async (req, res, next) => {
+    const { id, lectureid } = req.params;
+    const course = await Course.findById(id);
+    if (!course) {
+        return next(new AppError('Course with given id does not exist', 500));
+    }
+
+    if(!lectureid){
+        return next(new AppError('lecture id does not exist', 500));
+    }
+
+    // Use filter to create a new array excluding the lecture with the specified ID
+    course.lectures = course.lectures.filter(lecture => !lecture._id.equals(lectureid));
+
+    await course.save();
+    res.status(201).json({
+        success: true,
+        message: 'Lecture deleted successfully',
+        course,
+    });
+});
+
+
 module.exports = {
     getCourses,
     getLecturesByCourseId,
     createCourse,
     updateCourse,
     removeCourse,
-    addLectureToCourseById
+    addLectureToCourseById,
+    deleteLectureToCourseById,
 }
