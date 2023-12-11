@@ -9,8 +9,6 @@ const cloudinaryURl = async (localFilePath) => {
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto",
             folder: 'lms',
-            width: 250,
-            height: 250,
             gravity: 'face',
             crop: 'fill'
         })

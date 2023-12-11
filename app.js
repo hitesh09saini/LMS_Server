@@ -23,10 +23,13 @@ app.use('/ping', function (req, res) {
     res.send('/pong');
 });
 
-// routes
+// User routes
 const userRouter = require('./routes/user.routes');
 app.use('/api/v1/user', userRouter);
 
+// course routes 
+const courseRouter = require('./routes/course.routes');
+app.use('/api/v1/courses', courseRouter);
 
 
 app.all('*', (req, res) => {

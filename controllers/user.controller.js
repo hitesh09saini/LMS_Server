@@ -76,7 +76,7 @@ const register = asyncHandler(async (req, res, next) => {
 const login = asyncHandler(async (req, res, next) => {
 
     const { email, password } = req.body;
-
+ 
     if (!email || !password) {
         return next(new AppError('All field are requird', 400))
 
