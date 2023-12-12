@@ -100,12 +100,46 @@ const verifySubscription = asyncHandler(async (req, res, next) => {
 
 // cancel
 const cancelSubscription = asyncHandler(async (req, res, next) => {
-   
+    const { id } = req.user;
+    const user = await User.findById(id);
 
+    if (!user) {
+        return next(
+            new AppError('unauthorized account, please login', 400)
+        )
+    }
+
+    const subscriptionId = user.subscription.id;
+    const subscription = await razorpay.subscriptions.cancel(
+        subscriptionId
+    )
+
+    user.subscription.status = subscription.status;
+
+    await user.save();
+
+    res.status(201).json({
+        success: true,
+        message: 'payment cancel successfully',
+    });
 })
 
 // payments
 const allPayments = asyncHandler(async (req, res, next) => {
+    const {count}= req.query;
+
+    const subscriptions = await razorpay.subscriptions.all({
+        count: count || 10,
+    });
+
+    // const payments = 
+
+    res.status(201).json({
+        success: true,
+        message: 'all payment',
+        subscriptions
+    });
+
 
 })
 

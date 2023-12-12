@@ -10,16 +10,16 @@ const { getCourses,
 
 const authorizedRoles = require('../middlewares/auth.middleWare');
 const isLoggedIn = require('../middlewares/isLogged.middleware');
-
+const authorizedSubscriber = require('../middlewares/authSubscriber.middleware')
 const router = Router();
 
 router.route('/')
-    .get(getCourses)
+    .get( getCourses)
     .post(isLoggedIn, authorizedRoles('ADMIN'), upload.single('thumbnail'), createCourse)
 
 
 router.route('/:id')
-    .get(isLoggedIn, getLecturesByCourseId)
+    .get(isLoggedIn,authorizedSubscriber, getLecturesByCourseId)
     .put(isLoggedIn,authorizedRoles('ADMIN'), updateCourse)
     .delete(isLoggedIn,authorizedRoles('ADMIN'), removeCourse)
     .post(isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), addLectureToCourseById)
